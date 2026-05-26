@@ -1,0 +1,93 @@
+{
+    "logging": {
+        "level": "DEBUG",
+        "format": "[{timestamp}] [{component}] [{level}] {message}",
+        "timestamp": {
+            "enable": true,
+            "format": "%Y-%m-%d %H:%M:%S"
+        },
+        "file": {
+            "enable": true,
+            "dir": "../logs",
+            "bridge_log": "bridge.log",
+            "watcher_log": "watcher.log",
+            "max_size": 1048576,
+            "backup_count": 5
+        }
+    },
+    "watcher": {
+        "device_check_interval": 5
+    },
+    "bridge": {
+        "device": "/dev/ttyACM1",
+        "connection": {
+            "baudrate": 115200,
+            "timeout": 0.01,
+            "reconnect_delay": 0.05,
+            "max_reconnect_attempts": 10
+        }
+    },
+    "cava": {
+        "framerate": 30,
+        "input": {
+            "method": "alsa",
+            "source": "hw:Loopback,1,0",
+            "channels": "stereo"
+        },
+        "output": {
+            "method": "raw",
+            "raw_target": "/dev/stdout"
+        },
+        "defaults": {
+            "data_format": "json",
+            "spectrum_bars": 16,
+            "ascii_range": 8,
+            "autosens": 1,
+            "sensitivity": 100
+        },
+        "smoothing": {
+            "noise_reduction": 0,
+            "monstercat": 0,
+            "waves": 0,
+            "gravity": 0
+        },
+        "eq": {
+            "1": 1.0,
+            "2": 1.0,
+            "3": 1.0,
+            "4": 1.0,
+            "5": 1.0,
+            "6": 1.0,
+            "7": 1.0,
+            "8": 1.0
+        }
+    },
+    "sysinfo": {
+        "update_interval": 2.0
+    },
+    "mpd": {
+        "host": "localhost",
+        "port": 6600,
+        "update_interval": 0.2,
+        "reconnect": {
+            "delay": 5,
+            "max_attempts": 30
+        }
+    },
+    "performance": {
+        "serial_poll_ms": 5,
+        "queue_timeout_ms": 5,
+        "max_queue_size": 60
+    },
+    "priority_levels": {
+        "critical": -1,
+        "high": 0,
+        "normal": 1,
+        "low": 2
+    },
+    "actions": {
+        "test":     { "command": "echo \"ok $MCUB_ACTION_NAME $(date)\" > $HOME/mcub-test.log" },
+        "shutdown": { "command": "sudo /sbin/shutdown -h now" },
+        "reboot":   { "command": "sudo /sbin/reboot" }
+    }
+}

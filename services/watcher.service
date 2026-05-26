@@ -1,0 +1,25 @@
+[Unit]
+Description=MCUB Watcher - Device Monitor (Rust)
+After=network.target sound.target mpd.service
+Wants=mpd.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+Environment=MCUB_BASE_DIR=@MCUB_BASE_DIR@
+ExecStart=/usr/local/bin/mcub-watcher-rust
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mcub-watcher-rust
+
+ProtectSystem=strict
+ProtectHome=false
+ReadWritePaths=@MCUB_BASE_DIR@ %h
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
