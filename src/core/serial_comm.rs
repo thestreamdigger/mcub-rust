@@ -105,6 +105,11 @@ impl SerialComm {
         }
     }
 
+    pub fn queue_stats(&self) -> Option<crate::core::serial_queue::QueueStats> {
+        let state = self.state.lock().unwrap();
+        state.queue.as_ref().map(|q| q.stats())
+    }
+
     pub fn read_message(&self, timeout: Duration) -> Option<String> {
         let timeout = if timeout.is_zero() { self.poll_timeout } else { timeout };
         let state = self.state.lock().unwrap();

@@ -371,15 +371,17 @@ impl HybridBridge {
         };
         let mpd_peak = stats.mpd_latency_max * 1000.0;
         let uptime = stats.start.map(|s| now.duration_since(s).as_secs()).unwrap_or(0);
+        let qs = self.inner.serial.queue_stats().unwrap_or_default();
 
         log_info!(
             self.inner.logger,
-            "Stats: CAVA={} ({:.1}/s, drops={}), MPD={} (avg={:.1}ms, peak={:.1}ms), sys={}, cmds={}, sent={:.1}KB, up={}s",
+            "Stats: CAVA={} ({:.1}/s, drops={}), MPD={} (avg={:.1}ms, peak={:.1}ms), sys={}, cmds={}, sent={:.1}KB, queue(peak={}, wr={:.1}/{:.1}ms), up={}s",
             stats.cava_frames, cava_fps, drops,
             stats.mpd_updates, mpd_avg, mpd_peak,
             stats.sysinfo_updates,
             stats.commands,
             stats.bytes_sent as f64 / 1024.0,
+            qs.peak_depth, qs.write_avg_ms, qs.write_max_ms,
             uptime
         );
 

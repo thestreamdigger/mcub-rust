@@ -48,6 +48,7 @@ struct ErrorState {
     stats_writes: usize,
 }
 
+#[derive(Default)]
 pub struct QueueStats {
     pub peak_depth: usize,
     pub write_avg_ms: f64,
