@@ -50,6 +50,7 @@ struct Watcher {
     device_check_interval: u32,
     baudrate: u32,
     bridge: Option<Child>,
+    bridge_started_at: Option<Instant>,
     active: Option<Active>,
     cooldowns: HashMap<String, Cooldown>,
 }
@@ -77,6 +78,7 @@ impl Watcher {
             logger,
             project_root,
             bridge: None,
+            bridge_started_at: None,
             active: None,
             cooldowns: HashMap::new(),
         })
@@ -218,6 +220,7 @@ impl Watcher {
                 let fmt_info = if id.format == DeviceFormat::Binary { " (binary)" } else { "" };
                 self.logger.ok(&format!("Bridge: {}{}", bridge_type, fmt_info));
                 self.bridge = Some(child);
+                self.bridge_started_at = Some(Instant::now());
                 true
             }
             _ => {
@@ -257,7 +260,10 @@ impl Watcher {
         }
 
         if let Some(active) = self.active.as_ref() {
-            if active.bridge_type == DeviceType::Cava && !is_cava_running() {
+            let in_grace = self.bridge_started_at
+                .map(|t| t.elapsed() < Duration::from_secs(8))
+                .unwrap_or(false);
+            if active.bridge_type == DeviceType::Cava && !in_grace && !is_cava_running() {
                 self.logger.info("CAVA died, restart");
                 let dev = active.device.clone();
                 let id = DeviceId {
