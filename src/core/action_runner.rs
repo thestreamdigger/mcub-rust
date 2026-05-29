@@ -17,15 +17,18 @@ struct RunnerState {
 static STATE: OnceLock<RunnerState> = OnceLock::new();
 
 pub fn init(actions: HashMap<String, ActionEntry>, logger: Arc<Logger>) {
-    let _ = STATE.set(RunnerState {
-        actions,
-        logger: Arc::clone(&logger),
-    });
     // NOTE: mcub-c uses signal(SIGCHLD, SIG_IGN) for kernel auto-reap of action
     // grandchildren. That strategy breaks std::process::Command in Rust because
     // its internal waitpid returns ECHILD. We use double-fork instead: action
     // becomes orphan adopted by init, which reaps it. SIGCHLD stays at default,
     // so Command::output() and similar continue working in the bridge process.
+    let first_init = STATE.set(RunnerState {
+        actions,
+        logger: Arc::clone(&logger),
+    }).is_ok();
+    if !first_init {
+        return;
+    }
     let state = STATE.get().unwrap();
     if !state.actions.is_empty() {
         log_ok!(logger, "actions: {} loaded", state.actions.len());
