@@ -185,6 +185,8 @@ impl HybridBridge {
         let supports_cava = self.inner.supports.lock().unwrap().cava;
         let supports_sysinfo = self.inner.supports.lock().unwrap().sysinfo;
 
+        let mut handles: Vec<(&'static str, JoinHandle<()>)> = Vec::new();
+
         if supports_mpd {
             log_info!(self.inner.logger, "MPD starting");
             let mpd = Arc::new(MpdBridge::new(
@@ -195,6 +197,14 @@ impl HybridBridge {
                 log_warning!(self.inner.logger, "MPD not ready");
             }
             Arc::get_mut(&mut self.inner).expect("unique").mpd = Some(mpd);
+
+            let inner = Arc::clone(&self.inner);
+            let h = thread::Builder::new()
+                .name("MPDCheckerThread".into())
+                .spawn(move || mpd_checker_loop(inner))
+                .unwrap();
+            log_debug!(self.inner.logger, "Thread: MPDCheckerThread");
+            handles.push(("MPDCheckerThread", h));
         }
 
         if supports_cava {
@@ -212,35 +222,22 @@ impl HybridBridge {
                 *self.inner.cava_deferred.lock().unwrap() = true;
             }
             *self.inner.cava.lock().unwrap() = Some(cava);
+
+            if !*self.inner.cava_deferred.lock().unwrap() {
+                let inner = Arc::clone(&self.inner);
+                let h = thread::Builder::new()
+                    .name("CAVAReaderThread".into())
+                    .spawn(move || cava_reader_loop(inner))
+                    .unwrap();
+                log_debug!(self.inner.logger, "Thread: CAVAReaderThread");
+                handles.push(("CAVAReaderThread", h));
+            }
         }
 
         if supports_sysinfo {
             let mut collector = SysinfoCollector::new();
             collector.warmup();
             *self.inner.sysinfo.lock().unwrap() = Some(collector);
-        }
-
-        // Spawn threads
-        let mut handles: Vec<(&'static str, JoinHandle<()>)> = Vec::new();
-
-        if supports_mpd && self.inner.mpd.is_some() {
-            let inner = Arc::clone(&self.inner);
-            let h = thread::Builder::new()
-                .name("MPDCheckerThread".into())
-                .spawn(move || mpd_checker_loop(inner))
-                .unwrap();
-            log_debug!(self.inner.logger, "Thread: MPDCheckerThread");
-            handles.push(("MPDCheckerThread", h));
-        }
-
-        if supports_cava && !*self.inner.cava_deferred.lock().unwrap() {
-            let inner = Arc::clone(&self.inner);
-            let h = thread::Builder::new()
-                .name("CAVAReaderThread".into())
-                .spawn(move || cava_reader_loop(inner))
-                .unwrap();
-            log_debug!(self.inner.logger, "Thread: CAVAReaderThread");
-            handles.push(("CAVAReaderThread", h));
         }
 
         {

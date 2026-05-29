@@ -296,15 +296,13 @@ impl Watcher {
         }
 
         for ty in ["mpd", "cava", "hybrid", "sysinfo"] {
-            if is_bridge_running(ty) {
-                let _ = Command::new("pkill")
-                    .args(["-f", &format!("mcub-bridge-rust {ty}")])
-                    .stdout(Stdio::null())
-                    .stderr(Stdio::null())
-                    .status();
-                self.logger.info(&format!("{ty} stopped"));
-                killed_any = true;
-            }
+            let _ = Command::new("pkill")
+                .args(["-f", &format!("mcub-bridge-rust {ty}")])
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status();
+            self.logger.info(&format!("{ty} stopped"));
+            killed_any = true;
         }
 
         if is_cava_running() {
