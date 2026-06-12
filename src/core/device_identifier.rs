@@ -110,7 +110,7 @@ where
     }
 
     let format = if env.d.binary { DeviceFormat::Binary } else { DeviceFormat::Json };
-    let spectrum_bars = env.d.bars;
+    let spectrum_bars = env.d.bars.map(|b| b.clamp(1, 127));
 
     let mut has_mpd = false;
     let mut has_cava = false;

@@ -1,6 +1,6 @@
 # MCUB-Rust — MPD CAVA UART Bridge
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/thestreamdigger/mcub-rust)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/thestreamdigger/mcub-rust)
 [![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi-red.svg)](https://www.raspberrypi.org/)
 [![Language](https://img.shields.io/badge/language-Rust-yellow.svg)](https://www.rust-lang.org/)

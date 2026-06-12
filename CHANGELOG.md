@@ -3,9 +3,15 @@
 All notable changes to this project will be documented in this file.
 Format based on Keep a Changelog (https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.2.0] - 2026-06-12
+
+### Added
+- docs/PROTOCOL.md pointer to canonical spec (mcub-c, MCUB v2.2.0)
 
 ### Fixed
+- Bridge hung forever on internal failure exit: when a worker thread died (e.g. CAVA), the main loop broke to cleanup but never raised the stop flag worker loops poll — `cleanup()` blocked in `join()` and the process stayed alive, so the watcher's `try_wait` liveness check never fired (observed: 3 min zombie bridge on zukunft, 2026-06-12). Internal exits now call `signal_handler::request_stop()` before cleanup
+- Watcher cleanup `pkill -f /usr/bin/cava` was unscoped — it killed ANY port's cava system-wide. CAVA config path now suffixed `/tmp/cava_config_rust` and all pgrep/pkill patterns scoped to it
+- identify `bars` clamped to 1-127 (`device_identifier.rs`)
 - Serial lock contention capped spectrum at ~37/s: `read_message` held the comm-state mutex for its full 50 ms readline while send paths needed the same lock to reach the queue. Handles now fetched under a short lock, I/O outside it. Invisible at 30 fps (cap > target), exposed by 60 fps. Verified on zukunft: 58.0/s, drops=0
 - Binary cava read now blocks in `poll()` honoring the frame-interval timeout instead of caller-side 5 ms sleep-polling (same fix as mcub-c; 5 ms quantization cannot sustain 60 fps cadence)
 

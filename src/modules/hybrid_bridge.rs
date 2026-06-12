@@ -274,6 +274,7 @@ impl HybridBridge {
             });
             if let Some(name) = died {
                 log_error!(self.inner.logger, "Thread died: {}", name);
+                signal_handler::request_stop();
                 break;
             }
 

@@ -49,3 +49,10 @@ pub fn block_in_thread() {
 pub fn received() -> bool {
     SIGNAL_RECEIVED.load(Ordering::SeqCst)
 }
+
+// Internal stop (thread death, fatal error): raises the same flag worker
+// loops poll, so cleanup() joins terminate and the process can exit for
+// the watcher to restart it
+pub fn request_stop() {
+    SIGNAL_RECEIVED.store(true, Ordering::SeqCst);
+}

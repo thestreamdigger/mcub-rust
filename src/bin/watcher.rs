@@ -492,7 +492,7 @@ fn is_bridge_running(bridge_type: &str) -> bool {
 
 fn is_cava_running() -> bool {
     Command::new("pgrep")
-        .args(["-f", "/usr/bin/cava"])
+        .args(["-f", "/usr/bin/cava -p /tmp/cava_config_rust"])
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .status()
@@ -502,17 +502,17 @@ fn is_cava_running() -> bool {
 
 fn cleanup_cava_process(logger: &Logger) {
     let _ = Command::new("pkill")
-        .args(["-f", "/usr/bin/cava"])
+        .args(["-f", "/usr/bin/cava -p /tmp/cava_config_rust"])
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .status();
     std::thread::sleep(Duration::from_millis(200));
     let _ = Command::new("pkill")
-        .args(["-9", "-f", "/usr/bin/cava"])
+        .args(["-9", "-f", "/usr/bin/cava -p /tmp/cava_config_rust"])
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .status();
-    let _ = fs::remove_file("/tmp/cava_config");
+    let _ = fs::remove_file("/tmp/cava_config_rust");
     logger.info("CAVA cleanup done");
 }
 

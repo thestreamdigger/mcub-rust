@@ -16,7 +16,7 @@ use crate::core::logger::Logger;
 use crate::{log_debug, log_error, log_info, log_ok, log_warning};
 
 const PROCESS_SETTLE: Duration = Duration::from_millis(100);
-const CONFIG_PATH: &str = "/tmp/cava_config";
+const CONFIG_PATH: &str = "/tmp/cava_config_rust";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CavaFormat {
@@ -85,7 +85,7 @@ impl CavaManager {
 
     pub fn kill_existing(&self) {
         let out = Command::new("pgrep")
-            .args(["-f", "/usr/bin/cava -p /tmp/cava_config"])
+            .args(["-f", "/usr/bin/cava -p /tmp/cava_config_rust"])
             .output();
         let Ok(out) = out else { return };
 
