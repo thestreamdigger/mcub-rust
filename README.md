@@ -68,7 +68,7 @@ One-to-one with `mcub-c/src/{core,modules,watcher}` plus a Rust-flavored top-lev
 
 ## Compared to mcub-c
 
-External behavior identical (same MCUB protocol v2.2.0, same `settings.json`, same systemd unit name). Internal differences:
+External behavior identical (same MCUB protocol v2.3.0, same `settings.json`, same systemd unit name). Internal differences:
 
 | mcub-c | mcub-rust |
 |---|---|

@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 Format based on Keep a Changelog (https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Changed
+- docs/PROTOCOL.md pointer updated to canonical v2.3.0
+
 ## [0.2.0] - 2026-06-12
 
 ### Added
