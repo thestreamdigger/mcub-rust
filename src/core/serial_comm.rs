@@ -87,17 +87,19 @@ impl SerialComm {
         state.fd = None;
     }
 
+    // Fetch handles under a short lock, do I/O outside it: read_message's
+    // 50ms readline used to hold the lock and cap spectrum sends at ~37/s
     pub fn send_message(&self, json_str: &str, priority: i32) -> bool {
-        let state = self.state.lock().unwrap();
-        match state.queue.as_ref() {
+        let q = self.state.lock().unwrap().queue.as_ref().map(std::sync::Arc::clone);
+        match q {
             Some(q) => q.send_json(json_str, priority),
             None => false,
         }
     }
 
     pub fn send_binary_spectrum(&self, raw_data: &[u8], header_byte: u8, priority: i32) -> bool {
-        let state = self.state.lock().unwrap();
-        match state.queue.as_ref() {
+        let q = self.state.lock().unwrap().queue.as_ref().map(std::sync::Arc::clone);
+        match q {
             Some(q) => q.send_binary_spectrum(raw_data, header_byte, SYNC_BYTE, priority),
             None => false,
         }
@@ -110,9 +112,11 @@ impl SerialComm {
 
     pub fn read_message(&self, timeout: Duration) -> Option<String> {
         let timeout = if timeout.is_zero() { self.poll_timeout } else { timeout };
-        let state = self.state.lock().unwrap();
-        let fd = state.fd.as_ref()?;
-        readline(fd.as_fd().as_raw_fd(), timeout)
+        let raw = {
+            let state = self.state.lock().unwrap();
+            state.fd.as_ref()?.as_fd().as_raw_fd()
+        };
+        readline(raw, timeout)
     }
 
     pub fn identify_device(&self) -> Option<String> {

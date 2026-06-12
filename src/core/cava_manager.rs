@@ -237,7 +237,7 @@ impl CavaManager {
         }
 
         match self.cava_format {
-            CavaFormat::Binary => self.read_binary(max_values),
+            CavaFormat::Binary => self.read_binary(max_values, timeout),
             CavaFormat::Ascii => self.read_ascii(max_values, timeout),
         }
     }
@@ -281,7 +281,7 @@ impl CavaManager {
         ReadResult::Frame(values)
     }
 
-    fn read_binary(&mut self, max_values: usize) -> ReadResult {
+    fn read_binary(&mut self, max_values: usize, timeout: Duration) -> ReadResult {
         let fd = self.stdout_fd.as_ref().unwrap();
         let raw = fd.as_raw_fd();
 
@@ -290,6 +290,17 @@ impl CavaManager {
             unsafe { libc::fcntl(raw, libc::F_SETFL, flags | libc::O_NONBLOCK) };
             self.binary_fd_configured = true;
             log_debug!(self.logger, "Binary read: non-blocking configured");
+        }
+
+        // Block in poll until data arrives (or timeout) instead of caller-side
+        // sleep-polling: 5ms sleep quantization cannot sustain 60fps cadence
+        if self.binary_buffer.len() < self.frame_size {
+            let ms = timeout.as_millis().max(1) as u16;
+            let mut pfds = [PollFd::new(fd.as_fd_ref(), PollFlags::POLLIN)];
+            match poll(&mut pfds, PollTimeout::from(ms)) {
+                Ok(n) if n > 0 => {}
+                _ => return ReadResult::None,
+            }
         }
 
         let mut chunk = vec![0u8; self.read_chunk_size];

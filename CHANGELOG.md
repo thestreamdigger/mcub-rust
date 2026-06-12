@@ -5,6 +5,10 @@ Format based on Keep a Changelog (https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Serial lock contention capped spectrum at ~37/s: `read_message` held the comm-state mutex for its full 50 ms readline while send paths needed the same lock to reach the queue. Handles now fetched under a short lock, I/O outside it. Invisible at 30 fps (cap > target), exposed by 60 fps. Verified on zukunft: 58.0/s, drops=0
+- Binary cava read now blocks in `poll()` honoring the frame-interval timeout instead of caller-side 5 ms sleep-polling (same fix as mcub-c; 5 ms quantization cannot sustain 60 fps cadence)
+
 ### Changed
 - MPD protocol usage modernized (parity with mcub-c, MPD 0.24.x): `toggle_pause` (deprecated no-arg `pause`) → explicit `pause(bool)`; `single`/`consume` parse now oneshot-aware (`v != "0"`; old `v == "1"` treated `oneshot` as off, inverting the toggle)
 - mpd bridge no longer probes `status` every 10 ms loop iteration (~100 req/s); reconnects only when `mpd_connected` flag drops (`check_connection` removed)
