@@ -117,12 +117,6 @@ impl MpdBridge {
         }
     }
 
-    pub fn check_connection(&self) -> bool {
-        let mut guard = self.mpd.lock().unwrap();
-        let Some(client) = guard.as_mut() else { return false; };
-        client.status().is_ok()
-    }
-
     pub fn disconnect(&self) {
         let mut guard = self.mpd.lock().unwrap();
         if guard.take().is_some() {
@@ -162,7 +156,9 @@ impl MpdBridge {
         while !signal_handler::received() {
             self.send_status();
             self.process_device_commands();
-            if !self.check_connection() {
+            // state-JSON path flips mpd_connected on error; no per-iteration
+            // status probe (was ~100 req/s against MPD)
+            if !self.is_connected() {
                 self.attempt_reconnection();
             }
             std::thread::sleep(Duration::from_millis(10));
@@ -333,7 +329,7 @@ impl MpdBridge {
         let result: McubResult<()> = match action {
             "play_pause" => match client.status() {
                 Ok(st) if st.state == MpdState::Stop => client.play(),
-                Ok(_) => client.toggle_pause(),
+                Ok(st) => client.pause(st.state == MpdState::Play),
                 Err(e) => Err(e),
             },
             "next" => client.next(),

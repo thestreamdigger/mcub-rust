@@ -145,8 +145,9 @@ impl MpdClient {
                 "playlistlength" => s.queue_len = v.parse().unwrap_or(0),
                 "repeat" => s.repeat = v == "1",
                 "random" => s.random = v == "1",
-                "single" => s.single = v == "1",
-                "consume" => s.consume = v == "1",
+                // oneshot-aware: protocol reports "0"/"1"/"oneshot" (single MPD 0.21+, consume 0.24+)
+                "single" => s.single = v != "0",
+                "consume" => s.consume = v != "0",
                 _ => {}
             }
         }
@@ -182,7 +183,10 @@ impl MpdClient {
     pub fn stop(&mut self) -> Result<()> { self.exec("stop") }
     pub fn next(&mut self) -> Result<()> { self.exec("next") }
     pub fn previous(&mut self) -> Result<()> { self.exec("previous") }
-    pub fn toggle_pause(&mut self) -> Result<()> { self.exec("pause") }
+    // explicit pause mode: no-arg "pause" toggle is deprecated MPD protocol
+    pub fn pause(&mut self, on: bool) -> Result<()> {
+        self.exec(&format!("pause {}", if on { 1 } else { 0 }))
+    }
     pub fn play_pos(&mut self, pos: u32) -> Result<()> {
         self.exec(&format!("play {pos}"))
     }

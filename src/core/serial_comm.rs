@@ -60,12 +60,10 @@ impl SerialComm {
 
         std::thread::sleep(Duration::from_millis(500));
 
-        let queue_timeout = self.config.performance.queue_timeout_ms as f64 / 1000.0;
         let queue = Arc::new(SerialQueue::new(
             fd.as_raw_fd(),
             Arc::clone(&self.logger),
             &self.bridge_name,
-            queue_timeout,
             self.config.performance.max_queue_size as usize,
         ));
         queue.start();

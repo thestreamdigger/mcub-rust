@@ -133,11 +133,12 @@ impl CavaManager {
         } else {
             writeln!(f, "ascii_max_range = {}", cava.defaults.ascii_range)?;
         }
+        // cava 0.10.x [smoothing]: noise_reduction, monstercat, waves only
+        // (gravity removed upstream; unknown keys silently ignored)
         writeln!(f, "\n[smoothing]")?;
         writeln!(f, "noise_reduction = {}", cava.smoothing.noise_reduction)?;
         writeln!(f, "monstercat = {}", cava.smoothing.monstercat)?;
         writeln!(f, "waves = {}", cava.smoothing.waves)?;
-        writeln!(f, "gravity = {}", cava.smoothing.gravity)?;
         writeln!(f, "\n[eq]")?;
         for (i, v) in cava.eq.iter().enumerate() {
             writeln!(f, "{} = {:.1}", i + 1, v)?;

@@ -77,7 +77,6 @@ impl SerialQueue {
         serial_fd: RawFd,
         logger: Arc<Logger>,
         bridge_name: &str,
-        _queue_timeout: f64,
         max_queue_size: usize,
     ) -> Self {
         log_debug!(logger, "Queue init: {bridge_name}");

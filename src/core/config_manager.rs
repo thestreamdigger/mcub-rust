@@ -87,7 +87,6 @@ pub struct CavaSmoothingConfig {
     pub noise_reduction: u32,
     pub monstercat: u32,
     pub waves: u32,
-    pub gravity: u32,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -128,7 +127,6 @@ pub struct SysinfoConfig {
 #[serde(default)]
 pub struct PerformanceConfig {
     pub serial_poll_ms: u32,
-    pub queue_timeout_ms: u32,
     pub max_queue_size: u32,
 }
 
@@ -259,7 +257,7 @@ fn default_eq() -> [f64; 8] {
 impl Default for CavaConfig {
     fn default() -> Self {
         Self {
-            framerate: 30,
+            framerate: 60,
             input: CavaInputConfig::default(),
             output: CavaOutputConfig::default(),
             defaults: CavaDefaultsConfig::default(),
@@ -296,7 +294,6 @@ impl Default for PerformanceConfig {
     fn default() -> Self {
         Self {
             serial_poll_ms: 5,
-            queue_timeout_ms: 5,
             max_queue_size: 60,
         }
     }
